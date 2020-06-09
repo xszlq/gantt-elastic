@@ -19,6 +19,7 @@
         class="gantt-elastic__task-list-items"
         ref="taskListItems"
         :style="{ ...root.style['task-list-items'], height: root.state.options.rowsHeight + 'px' }"
+        @wheel.prevent="chartWheel"
       >
         <task-list-item v-for="task in root.visibleTasks" :key="task.id" :task="task"></task-list-item>
       </div>
@@ -47,6 +48,12 @@ export default {
     this.root.state.refs.taskListWrapper = this.$refs.taskListWrapper;
     this.root.state.refs.taskList = this.$refs.taskList;
     this.root.state.refs.taskListItems = this.$refs.taskListItems;
+  },
+  methods: {
+    chartWheel(ev) {
+      this.root.$emit('task-wheel', ev);
+    }
   }
+
 };
 </script>

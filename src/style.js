@@ -161,7 +161,7 @@ export default function getStyle(fontSize = '12px', fontFamily = 'Arial, sans-se
       margin: '4px 0px'
     },
     'task-list-items': {
-      overflow: 'hidden'
+      // overflow: 'hidden'
     },
     'task-list-item': {
       'border-top': '1px solid #eee',

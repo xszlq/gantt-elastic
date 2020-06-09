@@ -1002,6 +1002,25 @@ const GanttElastic = {
       this.scrollToTime(this.state.options.scroll.chart.timeCenter);
     },
 
+    // mouse wheel task area event handler
+    onWheelTask(ev){
+      if (!ev.shiftKey && ev.deltaX === 0) {
+        let top = this.state.options.scroll.top + ev.deltaY;
+        const chartClientHeight = this.state.options.rowsHeight;
+        const scrollHeight = this.state.refs.chartGraph.scrollHeight - chartClientHeight;
+        if (top < 0) {
+          top = 0;
+        } else if (top > scrollHeight) {
+          top = scrollHeight;
+        }
+        this.state.refs.chartScrollContainerVertical.scrollTop = top;
+        this.state.refs.chartGraph.scrollTop = top;
+        this.state.refs.taskListItems.scrollTop = top;
+        this.state.options.scroll.top = top;
+        this.syncScrollTop();
+      }
+    },
+
     /**
      * Mouse wheel event handler
      */
@@ -1099,6 +1118,8 @@ const GanttElastic = {
       this.$on('scope-change', this.onScopeChange);
       this.$on('taskList-width-change', this.onTaskListWidthChange);
       this.$on('taskList-column-width-change', this.onTaskListColumnWidthChange);
+
+      this.$on('task-wheel', this.onWheelTask)
     },
 
     /**

@@ -1422,7 +1422,13 @@ var TaskListvue_type_template_id_6e11f12f_render = function() {
               staticClass: "gantt-elastic__task-list-items",
               style: Object.assign({}, _vm.root.style["task-list-items"], {
                 height: _vm.root.state.options.rowsHeight + "px"
-              })
+              }),
+              on: {
+                wheel: function($event) {
+                  $event.preventDefault()
+                  return _vm.chartWheel($event)
+                }
+              }
             },
             _vm._l(_vm.root.visibleTasks, function(task) {
               return _c("task-list-item", {
@@ -2522,6 +2528,7 @@ TaskListItem_component.options.__file = "src/components/TaskList/TaskListItem.vu
 //
 //
 //
+//
 
 
 
@@ -2543,7 +2550,13 @@ TaskListItem_component.options.__file = "src/components/TaskList/TaskListItem.vu
     this.root.state.refs.taskListWrapper = this.$refs.taskListWrapper;
     this.root.state.refs.taskList = this.$refs.taskList;
     this.root.state.refs.taskListItems = this.$refs.taskListItems;
+  },
+  methods: {
+    chartWheel(ev) {
+      this.root.$emit('task-wheel', ev);
+    }
   }
+
 });
 
 // CONCATENATED MODULE: ./src/components/TaskList/TaskList.vue?vue&type=script&lang=js&
@@ -3735,7 +3748,10 @@ var DependencyLinesvue_type_template_id_f1cbf6ba_render = function() {
             style: Object.assign(
               {},
               _vm.root.style["chart-dependency-lines-path"],
-              task.style["chart-dependency-lines-path"]
+              task.style["chart-dependency-lines-path"],
+              task.style[
+                "chart-dependency-lines-path-" + dependencyLine.task_id
+              ]
             ),
             attrs: { task: task, d: dependencyLine.points }
           })
@@ -3863,7 +3879,7 @@ DependencyLinesvue_type_template_id_f1cbf6ba_render._withStripped = true
         .filter(task => typeof task.dependentOn !== 'undefined')
         .map(task => {
           task.dependencyLines = task.dependentOn.map(id => {
-            return { points: this.getPoints(id, task.id) };
+            return { points: this.getPoints(id, task.id), task_id: id };
           });
           return task;
         })
@@ -5942,7 +5958,7 @@ function getStyle(fontSize = '12px', fontFamily = 'Arial, sans-serif') {
       margin: '4px 0px'
     },
     'task-list-items': {
-      overflow: 'hidden'
+      overflow: 'hidden auto'
     },
     'task-list-item': {
       'border-top': '1px solid #eee',
@@ -7102,6 +7118,25 @@ const GanttElastic = {
       this.scrollToTime(this.state.options.scroll.chart.timeCenter);
     },
 
+    // mouse wheel task area event handler
+    onWheelTask(ev){
+      if (!ev.shiftKey && ev.deltaX === 0) {
+        let top = this.state.options.scroll.top + ev.deltaY;
+        const chartClientHeight = this.state.options.rowsHeight;
+        const scrollHeight = this.state.refs.chartGraph.scrollHeight - chartClientHeight;
+        if (top < 0) {
+          top = 0;
+        } else if (top > scrollHeight) {
+          top = scrollHeight;
+        }
+        this.state.refs.chartScrollContainerVertical.scrollTop = top;
+        this.state.refs.chartGraph.scrollTop = top;
+        this.state.refs.taskListItems.scrollTop = top;
+        this.state.options.scroll.top = top;
+        this.syncScrollTop();
+      }
+    },
+
     /**
      * Mouse wheel event handler
      */
@@ -7199,6 +7234,8 @@ const GanttElastic = {
       this.$on('scope-change', this.onScopeChange);
       this.$on('taskList-width-change', this.onTaskListWidthChange);
       this.$on('taskList-column-width-change', this.onTaskListColumnWidthChange);
+
+      this.$on('task-wheel', this.onWheelTask)
     },
 
     /**

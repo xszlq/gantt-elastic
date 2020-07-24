@@ -1,5 +1,5 @@
-const path = require('path');
-const { VueLoaderPlugin } = require('vue-loader');
+const path = require('path')
+const {VueLoaderPlugin} = require('vue-loader')
 
 module.exports = {
   /*devServer: {
@@ -33,8 +33,13 @@ module.exports = {
       {
         test: /\.css$/,
         use: ['vue-style-loader', 'css-loader']
+      },
+      {
+        test: /\.js$/,
+        exclude: /(node_modules|bower_components|lib)/,
+        use: ['babel-loader']
       }
     ]
   },
   plugins: [new VueLoaderPlugin()]
-};
+}
